@@ -122,10 +122,11 @@ public static class CleanupUtil
 
 	public static int RidDictionaryOfDeadElements<TKey, TValue>(IDictionary<TKey, TValue> dict_in_question)
 	{
-		if (list_in_question == null)
+		if (dict_in_question == null)
 		{
 			return -1;
 		}
+
 		List<KeyValuePair<TKey, TValue>> survivor_list = new List<KeyValuePair<TKey, TValue>>();
 		
 		foreach(var a in dict_in_question)
