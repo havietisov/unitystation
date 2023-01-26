@@ -82,6 +82,7 @@ namespace Managers
 		public void Clear()
 		{
 			OnAlertLevelChange = () => { };
+			OnStatusDisplayUpdate = new StatusDisplayUpdateEvent();
 		}
 
 		private void OnRoundStart()
