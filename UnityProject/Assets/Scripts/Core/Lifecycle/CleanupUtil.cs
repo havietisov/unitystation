@@ -77,5 +77,6 @@ public static class CleanupUtil
 	{
 		ComponentManager.ObjectToPhysics.Clear();
 		Spawn.Clean();
+		GameManager.Instance.CentComm.Clear();
 	}
 }
