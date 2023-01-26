@@ -78,5 +78,6 @@ public static class CleanupUtil
 		ComponentManager.ObjectToPhysics.Clear();
 		Spawn.Clean();
 		GameManager.Instance.CentComm.Clear();
+		Items.Weapons.ExplosiveBase.ExplosionEvent = new UnityEngine.Events.UnityEvent<Vector3Int, Items.Weapons.BlastData>();
 	}
 }
