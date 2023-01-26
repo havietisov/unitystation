@@ -73,11 +73,15 @@ public static class CleanupUtil
 		return res;
 	}
 
-	public static void PerformCleanup()
+	public static void EndRoundCleanup()
+	{
+		GameManager.Instance.CentComm.Clear();
+		Items.Weapons.ExplosiveBase.ExplosionEvent = new UnityEngine.Events.UnityEvent<Vector3Int, Items.Weapons.BlastData>();
+	}
+
+	public static void RoundStartCleanup()
 	{
 		ComponentManager.ObjectToPhysics.Clear();
 		Spawn.Clean();
-		GameManager.Instance.CentComm.Clear();
-		Items.Weapons.ExplosiveBase.ExplosionEvent = new UnityEngine.Events.UnityEvent<Vector3Int, Items.Weapons.BlastData>();
 	}
 }

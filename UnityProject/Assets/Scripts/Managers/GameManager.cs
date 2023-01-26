@@ -534,7 +534,7 @@ public partial class GameManager : MonoBehaviour, IInitialise
 		// Tell all clients that the countdown has finished
 		UpdateCountdownMessage.Send(true, 0);
 		EventManager.Broadcast(Event.PostRoundStarted, true);
-		CleanupUtil.PerformCleanup();
+		CleanupUtil.RoundStartCleanup();
 	}
 
 	/// <summary>
@@ -603,8 +603,8 @@ public partial class GameManager : MonoBehaviour, IInitialise
 
 		CurrentRoundState = RoundState.Ended;
 		EventManager.Broadcast(Event.RoundEnded, true);
+		CleanupUtil.EndRoundCleanup();
 		counting = false;
-
 
 		StartCoroutine(WaitForRoundRestart());
 		GameMode.EndRoundReport();
