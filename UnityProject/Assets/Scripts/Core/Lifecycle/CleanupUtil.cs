@@ -76,6 +76,6 @@ public static class CleanupUtil
 
 	public static void PerformCleanup()
 	{
-		Debug.Log("Cleaned " + RidDictionaryOfDeadElements(ComponentManager.ObjectToPhysics) + " from ComponentManager.ObjectToPhysics");
+		ComponentManager.ObjectToPhysics.Clear();
 	}
 }
