@@ -76,5 +76,6 @@ public static class CleanupUtil
 	public static void PerformCleanup()
 	{
 		ComponentManager.ObjectToPhysics.Clear();
+		Spawn.Clean();
 	}
 }

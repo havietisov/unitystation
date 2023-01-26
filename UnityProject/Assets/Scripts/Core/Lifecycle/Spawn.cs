@@ -48,6 +48,12 @@ public static class Spawn
 	/// </summary>
 	public static readonly float DefaultScatterRadius = 0.1f;
 
+	public static void Clean()
+	{
+		Debug.Log("Removed  " + CleanupUtil.RidDictionaryOfDeadElements(nameToSpawnablePrefab) + " elements from " + nameof(Spawn) + "." + nameof(nameToSpawnablePrefab));
+		_ClearPools();
+	}
+
 	private static void EnsureInit()
 	{
 		if (objectPool == null)
