@@ -4,8 +4,7 @@ using UnityEngine;
 using System;
 public static class CleanupUtil
 {
-
-	static int RidListOfDeadElements(IList<Action> list_in_question)
+	public static int RidListOfDeadElements(IList<Action> list_in_question)
 	{ 
 		List<Action> survivor_list = new List<Action>();
 
@@ -28,7 +27,7 @@ public static class CleanupUtil
 		return res;
 	}
 
-	static int RidListOfDeadElements<T>(IList<T> list_in_question) where T: MonoBehaviour
+	public static int RidListOfDeadElements<T>(IList<T> list_in_question) where T: MonoBehaviour
 	{
 		List<T> survivor_list = new List<T>();
 		
@@ -51,7 +50,7 @@ public static class CleanupUtil
 		return res;
 	}
 
-	static int RidDictionaryOfDeadElements<TKey, TValue>(IDictionary<TKey, TValue> dict_in_question)
+	public static int RidDictionaryOfDeadElements<TKey, TValue>(IDictionary<TKey, TValue> dict_in_question)
 	{
 		List<KeyValuePair<TKey, TValue>> survivor_list = new List<KeyValuePair<TKey, TValue>>();
 		
