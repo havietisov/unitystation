@@ -96,6 +96,11 @@ public class DynamicItemStorage : NetworkBehaviour, IOnPlayerRejoin, IOnPlayerTr
 	/// </summary>
 	public readonly UnityEvent OnContentsChangeServer = new UnityEvent();
 
+	public static void Clear()
+	{
+		//Debug.Log(" removed " + CleanupUtil.RidDictionaryOfDeadElements(ServerObjectToSlots, (u, k) => u != null) + " dead items from DynamicItemStorage.ServerObjectToSlots");
+	}
+
 	public void Awake()
 	{
 		playerNetworkActions = GetComponent<PlayerNetworkActions>();
@@ -558,7 +563,7 @@ public class DynamicItemStorage : NetworkBehaviour, IOnPlayerRejoin, IOnPlayerTr
 			}
 		}
 
-		if (ServerObjectToSlots.ContainsKey(bodyPartUISlots.GameObject) &&
+		if (bodyPartUISlots.GameObject != null && ServerObjectToSlots.ContainsKey(bodyPartUISlots.GameObject) &&
 		    ServerObjectToSlots[bodyPartUISlots.GameObject].Count == 0)
 		{
 			ServerObjectToSlots.Remove(bodyPartUISlots.GameObject);
@@ -715,11 +720,19 @@ public class DynamicItemStorage : NetworkBehaviour, IOnPlayerRejoin, IOnPlayerTr
 			ClientContents[sstorageCharacteristicse.namedSlot] = new List<ItemSlot>();
 		ClientContents[sstorageCharacteristicse.namedSlot]
 			.Remove(slot);
-		if (ClientObjectToSlots.ContainsKey(BbodyPartUISlots.GameObject) == false)
+		if (BbodyPartUISlots.GameObject != null && ClientObjectToSlots.ContainsKey(BbodyPartUISlots.GameObject) == false)
 			ClientObjectToSlots[BbodyPartUISlots.GameObject] = new List<ItemSlot>();
-		ClientObjectToSlots[BbodyPartUISlots.GameObject]
-			.Remove(slot);
-		if (ClientSlotCharacteristic.ContainsKey(slot)) ClientSlotCharacteristic.Remove(slot);
+
+		if (BbodyPartUISlots.GameObject != null)
+		{
+			ClientObjectToSlots[BbodyPartUISlots.GameObject].Remove(slot);
+		}
+
+		if (slot != null && ClientSlotCharacteristic.ContainsKey(slot))
+		{
+			ClientSlotCharacteristic.Remove(slot);
+		}
+
 		ClientTotal.Remove(slot);
 		if (hasAuthority)
 		{
