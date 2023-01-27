@@ -48,17 +48,7 @@ namespace AdminTools
 			Init();
 		}
 
-		private void OnEnable()
-		{
-			SceneManager.activeSceneChanged += OnSceneChange;
-		}
-
-		private void OnDisable()
-		{
-			SceneManager.activeSceneChanged -= OnSceneChange;
-		}
-
-		void OnSceneChange(Scene oldScene, Scene newScene)
+		public void Clear()
 		{
 			foreach (Transform t in transform)
 			{
@@ -69,6 +59,7 @@ namespace AdminTools
 				}
 			}
 		}
+
 
 		void Init()
 		{

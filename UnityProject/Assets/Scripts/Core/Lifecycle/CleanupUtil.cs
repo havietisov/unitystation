@@ -154,6 +154,7 @@ public static class CleanupUtil
 		Items.Weapons.ExplosiveBase.ExplosionEvent = new UnityEngine.Events.UnityEvent<Vector3Int, Items.Weapons.BlastData>();
 		UpdateManager.Instance.Clear();
 		Items.TrackingBeacon.Clear();
+		AdminTools.AdminOverlay.Instance?.Clear();
 	}
 
 	public static void RoundStartCleanup()
