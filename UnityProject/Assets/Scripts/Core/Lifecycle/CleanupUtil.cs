@@ -120,6 +120,34 @@ public static class CleanupUtil
 		return res;
 	}
 
+	public static int RidDictionaryOfDeadElements<TKey, TValue>(Dictionary<TKey, TValue> dict_in_question, Func<TKey, TValue, bool> condition )
+	{
+		if (dict_in_question == null)
+		{
+			return -1;
+		}
+
+		List<KeyValuePair<TKey, TValue>> survivor_list = new List<KeyValuePair<TKey, TValue>>();
+
+		foreach (var a in dict_in_question)
+		{
+			if (condition(a.Key, a.Value))
+			{
+				survivor_list.Add(a);
+			}
+		}
+
+		int res = dict_in_question.Count - survivor_list.Count;
+		dict_in_question.Clear();
+
+		for (int i = 0, max = survivor_list.Count; i < max; i++)
+		{
+			dict_in_question.Add(survivor_list[i].Key, survivor_list[i].Value);
+		}
+
+		return res;
+	}
+
 	public static int RidDictionaryOfDeadElements<TKey, TValue>(IDictionary<TKey, TValue> dict_in_question)
 	{
 		if (dict_in_question == null)
@@ -155,7 +183,6 @@ public static class CleanupUtil
 		Items.Weapons.ExplosiveBase.ExplosionEvent = new UnityEngine.Events.UnityEvent<Vector3Int, Items.Weapons.BlastData>();
 		UpdateManager.Instance.Clear();
 		Items.TrackingBeacon.Clear();
-		AdminTools.AdminOverlay.Instance?.Clear();
 		UI.Core.Action.UIActionManager.Instance.ClientMultiIActionGUIToID.Clear();
 		Systems.Cargo.CargoManager.Instance.OnRoundRestart();
 	}
@@ -164,5 +191,9 @@ public static class CleanupUtil
 	{
 		ComponentManager.ObjectToPhysics.Clear();
 		Spawn.Clean();
+		CustomNetworkManager.Instance.Clear();
+		DynamicItemStorage.Clear();
+		AdminTools.AdminOverlay.Instance?.Clear();
+		EventManager.Instance.Clear();
 	}
 }
