@@ -180,4 +180,9 @@ public class EventManager : MonoBehaviour
 
 
 	}
+
+	public void Clear()
+	{
+		Debug.Log("removing " + CleanupUtil.RidDictionaryOfDeadElements(eventTable, (u, k) => k != null) + " dead elements from EventManager.eventTable");
+	}
 }
