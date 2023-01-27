@@ -78,7 +78,7 @@ public class UpdateManager : MonoBehaviour
 		Debug.Log("removed " + CleanupUtil.RidListOfSoonToBeDeadElements(fixedUpdateActions, u => (MonoBehaviour)u.Target) + " messed up events in UpdateManager.fixedUpdateActions");
 		Debug.Log("removed " + CleanupUtil.RidListOfSoonToBeDeadElements(lateUpdateActions, u => (MonoBehaviour)u.Target) + " messed up events in UpdateManager.lateUpdateActions");
 		Debug.Log("removed " + CleanupUtil.RidListOfSoonToBeDeadElements(periodicUpdateActions, u => (MonoBehaviour)u.Action.Target) + " messed up events in UpdateManager.periodicUpdateActions");
-		Debug.Log("removed " + CleanupUtil.RidListOfSoonToBeDeadElements(pooledTimedUpdates, u => (MonoBehaviour)u.Action.Target) + " messed up events in UpdateManager.pooledTimedUpdates");
+		Debug.Log("removed " + (CleanupUtil.RidListOfDeadElements(pooledTimedUpdates, u => (MonoBehaviour)u?.Action?.Target) + CleanupUtil.RidListOfSoonToBeDeadElements(pooledTimedUpdates, u => (MonoBehaviour)u?.Action?.Target)) + " messed up events in UpdateManager.pooledTimedUpdates");
 	}
 
 	private void Awake()
