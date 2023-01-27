@@ -152,12 +152,12 @@ public static class CleanupUtil
 	{
 		GameManager.Instance.CentComm.Clear();
 		Items.Weapons.ExplosiveBase.ExplosionEvent = new UnityEngine.Events.UnityEvent<Vector3Int, Items.Weapons.BlastData>();
+		UpdateManager.Instance.Clear();
 	}
 
 	public static void RoundStartCleanup()
 	{
 		ComponentManager.ObjectToPhysics.Clear();
 		Spawn.Clean();
-		UpdateManager.Instance.Clear();
 	}
 }
