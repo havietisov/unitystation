@@ -48,6 +48,12 @@ public class CustomNetworkManager : NetworkManager, IInitialise
 	public static Dictionary<uint, NetworkIdentity> Spawned => IsServer ? NetworkServer.spawned : NetworkClient.spawned;
 
 
+	public void Clear()
+	{
+		Debug.Log("removed " + CleanupUtil.RidDictionaryOfDeadElements(IndexLookupSpawnablePrefabs, (u, k) => u != null) + " dead elements from CustomNetworkManager.IndexLookupSpawnablePrefabs");
+	}
+
+
 	public override void Awake()
 	{
 		if (IndexLookupSpawnablePrefabs.Count == 0)
