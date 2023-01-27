@@ -50,6 +50,8 @@ namespace AdminTools
 
 		public void Clear()
 		{
+			Debug.Log("removed " + CleanupUtil.RidDictionaryOfDeadElements(serverInfos, (u, k) => k != null) + " dead elements from AdminOverlay.serverInfos");
+
 			foreach (Transform t in transform)
 			{
 				var panel = t.GetComponent<AdminOverlayPanel>();
