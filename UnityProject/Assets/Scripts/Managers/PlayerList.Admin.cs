@@ -113,18 +113,18 @@ public partial class PlayerList
 		LoadJobBanList();
 	}
 
-	void LoadBanList()
+	static void LoadBanList()
 	{
-		StartCoroutine(LoadBans());
+		Instance.StartCoroutine(LoadBans());
 	}
-	void LoadWhiteList(object source, FileSystemEventArgs e)
+	static void LoadWhiteList(object source, FileSystemEventArgs e)
 	{
 		LoadWhiteList();
 	}
 
-	void LoadWhiteList()
+	static void LoadWhiteList()
 	{
-		StartCoroutine(LoadWhiteListed());
+		Instance.StartCoroutine(LoadWhiteListed());
 	}
 
 	static void LoadCurrentAdmins(object source, FileSystemEventArgs e)
