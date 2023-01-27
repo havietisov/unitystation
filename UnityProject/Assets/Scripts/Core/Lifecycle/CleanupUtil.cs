@@ -18,7 +18,7 @@ public static class CleanupUtil
 		{
 			MonoBehaviour target = target_extractor(list_in_question[i]);
 
-			if (list_in_question[i] != null && target.gameObject.scene.buildIndex == -1)
+			if (list_in_question[i] != null && (target == null || target.gameObject.scene.buildIndex == -1))
 			{
 				survivor_list.Add(list_in_question[i]);
 			}
