@@ -198,5 +198,6 @@ public static class CleanupUtil
 		DynamicItemStorage.Clear();
 		AdminTools.AdminOverlay.Instance?.Clear();
 		EventManager.Instance.Clear();
+		Managers.SignalsManager.Instance.Clear();
 	}
 }

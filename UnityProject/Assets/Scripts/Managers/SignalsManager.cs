@@ -20,6 +20,19 @@ namespace Managers
 			EventManager.AddHandler(Event.SceneUnloading, () => Receivers.Clear());
 		}
 
+		public void Clear()
+		{
+			List<SignalReceiver> receivers = new List<SignalReceiver>();
+			receivers.AddRange(Receivers);
+			Debug.Log("removed " + CleanupUtil.RidListOfDeadElements(receivers) + " dead elements from SignalsManager.Receivers");
+			Receivers.Clear();
+
+			foreach (var a in receivers)
+			{
+				Receivers.Add(a);
+			}
+		}
+
 		/// <summary>
 		/// Called from the server as the Receivers list is only available for the host and to avoid clients from cheating.
 		/// Loops through all receivers and sends the signal if they match the signal type and/or frequency
