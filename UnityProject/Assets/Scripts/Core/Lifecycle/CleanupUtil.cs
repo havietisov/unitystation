@@ -156,6 +156,7 @@ public static class CleanupUtil
 		Items.TrackingBeacon.Clear();
 		AdminTools.AdminOverlay.Instance?.Clear();
 		UI.Core.Action.UIActionManager.Instance.ClientMultiIActionGUIToID.Clear();
+		Systems.Cargo.CargoManager.Instance.OnRoundRestart();
 	}
 
 	public static void RoundStartCleanup()
