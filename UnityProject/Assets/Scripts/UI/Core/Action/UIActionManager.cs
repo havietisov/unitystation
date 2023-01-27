@@ -43,6 +43,11 @@ namespace UI.Core.Action
 		public GameObject Panel;
 		public GameObject TooltipPrefab;
 
+		public void Clear()
+		{
+
+		}
+
 		public ActionTooltip TooltipInstance => tooltipInstance == null
 			? tooltipInstance = Instantiate(TooltipPrefab, transform.parent).GetComponent<ActionTooltip>()
 			: tooltipInstance;
@@ -394,7 +399,7 @@ namespace UI.Core.Action
 			DicIActionGUI = new Dictionary<IAction, List<UIAction>>();
 		}
 
-		public static void ClearAllActionsServer(Scene oldScene, Scene newScene)
+		public static void ClearAllActionsServer()
 		{
 			Instance.IActionGUIToMind.Clear();
 			Instance.ActivePlayerActions.Clear();
@@ -428,9 +433,6 @@ namespace UI.Core.Action
 
 		private void OnEnable()
 		{
-			SceneManager.activeSceneChanged += ClearAllActionsServer;
-			SceneManager.activeSceneChanged -= ClearAllActionsServer;
-
 			EventManager.AddHandler(Event.RoundEnded, OnRoundEnd);
 
 		}

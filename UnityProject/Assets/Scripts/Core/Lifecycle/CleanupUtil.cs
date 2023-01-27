@@ -184,11 +184,14 @@ public static class CleanupUtil
 		UpdateManager.Instance.Clear();
 		Items.TrackingBeacon.Clear();
 		UI.Core.Action.UIActionManager.Instance.ClientMultiIActionGUIToID.Clear();
+		UI.Core.Action.UIActionManager.ClearAllActionsServer();
 		Systems.Cargo.CargoManager.Instance.OnRoundRestart();
+		SoundManager.Instance.Clear();
 	}
 
 	public static void RoundStartCleanup()
 	{
+		PlayerList.Instance.AllPlayers.ForEach(u => u.GameObject = u.GameObject == null ? null : u.GameObject);
 		ComponentManager.ObjectToPhysics.Clear();
 		Spawn.Clean();
 		CustomNetworkManager.Instance.Clear();
