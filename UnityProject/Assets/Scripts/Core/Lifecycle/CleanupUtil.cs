@@ -150,6 +150,7 @@ public static class CleanupUtil
 
 	public static void EndRoundCleanup()
 	{
+		PlayerManager.Reset();
 		GameManager.Instance.CentComm.Clear();
 		Items.Weapons.ExplosiveBase.ExplosionEvent = new UnityEngine.Events.UnityEvent<Vector3Int, Items.Weapons.BlastData>();
 		UpdateManager.Instance.Clear();
