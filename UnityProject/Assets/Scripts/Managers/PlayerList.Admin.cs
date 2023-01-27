@@ -134,7 +134,7 @@ public partial class PlayerList
 
 	static void LoadCurrentAdmins()
 	{
-		StartCoroutine(LoadAdmins());
+		Instance.StartCoroutine(LoadAdmins());
 	}
 
 	static void LoadCurrentMentors(object source, FileSystemEventArgs e)
@@ -144,7 +144,7 @@ public partial class PlayerList
 
 	static void LoadCurrentMentors()
 	{
-		StartCoroutine(LoadMentors());
+		Instance.StartCoroutine(LoadMentors());
 	}
 
 	static void LoadJobBanList()
