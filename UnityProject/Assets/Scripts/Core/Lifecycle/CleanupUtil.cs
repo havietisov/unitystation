@@ -199,5 +199,6 @@ public static class CleanupUtil
 		AdminTools.AdminOverlay.Instance?.Clear();
 		EventManager.Instance.Clear();
 		Managers.SignalsManager.Instance.Clear();
+		UI.Core.Action.UIActionManager.Instance.Clear();
 	}
 }
