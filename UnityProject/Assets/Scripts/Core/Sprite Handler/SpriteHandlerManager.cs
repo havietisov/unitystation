@@ -66,7 +66,14 @@ public class SpriteHandlerManager : NetworkBehaviour
 
 	public void OnDestroy()
 	{
+		SpecialQueueChanges.Clear();
+		SpecialNewClientChanges.Clear();
+		SpecialPresentSprites.Clear();
+
+		QueueChanges.Clear();
+		NewClientChanges.Clear();
 		PresentSprites.Clear();
+		SpriteUpdateMessage.UnprocessedData.Clear();
 	}
 
 	public static void UnRegisterHandler(NetworkIdentity networkIdentity, SpriteHandler spriteHandler)
