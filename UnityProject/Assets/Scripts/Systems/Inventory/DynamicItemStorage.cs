@@ -783,12 +783,17 @@ public class DynamicItemStorage : NetworkBehaviour, IOnPlayerRejoin, IOnPlayerTr
 		{
 			if (spawnedList.TryGetValue(IntIn.ID, out var spawned) == false)
 			{
-				void TempFunction()
-				{
-					ProcessChangeClient(NewST);
-				}
+				WeakReference<DynamicItemStorage> wptr = new WeakReference<DynamicItemStorage>(this);
 
-				LoadManager.RegisterActionDelayed(TempFunction, 30);
+				LoadManager.RegisterActionDelayed(() =>
+				{
+					DynamicItemStorage di;
+
+					if (wptr.TryGetTarget(out di))
+					{
+						di.ProcessChangeClient(NewST);
+					}
+				}, 30);
 				return;
 			}
 

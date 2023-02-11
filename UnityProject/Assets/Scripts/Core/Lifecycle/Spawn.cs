@@ -51,6 +51,17 @@ public static class Spawn
 	public static void Clean()
 	{
 		Debug.Log("Removed  " + CleanupUtil.RidDictionaryOfDeadElements(nameToSpawnablePrefab) + " elements from " + nameof(Spawn) + "." + nameof(nameToSpawnablePrefab));
+
+		foreach (var a in nameToSpawnablePrefab.Values)
+		{
+			var placeable = a.GetComponent<Tiles.PlaceableTile>();
+
+			if (placeable != null)
+			{
+				placeable.Clear();
+			}
+		}
+
 		_ClearPools();
 	}
 

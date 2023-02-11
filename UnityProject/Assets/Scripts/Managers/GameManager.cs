@@ -389,7 +389,7 @@ public partial class GameManager : MonoBehaviour, IInitialise
 	/// If you have any static pools / caches / fields, add logic here to reset them to ensure they'll be properly
 	/// cleared when a new round begins.
 	/// </summary>
-	private void ResetStaticsOnNewRound()
+	public void ResetStaticsOnNewRound()
 	{
 		//reset pools
 		Spawn._ClearPools();
@@ -603,11 +603,11 @@ public partial class GameManager : MonoBehaviour, IInitialise
 
 		CurrentRoundState = RoundState.Ended;
 		EventManager.Broadcast(Event.RoundEnded, true);
+		GameMode.EndRoundReport();
 		CleanupUtil.EndRoundCleanup();
 		counting = false;
 
 		StartCoroutine(WaitForRoundRestart());
-		GameMode.EndRoundReport();
 
 		_ = SoundManager.PlayNetworked(endOfRoundSounds.GetRandomClip());
 	}
@@ -858,6 +858,7 @@ public partial class GameManager : MonoBehaviour, IInitialise
 			EventManager.Broadcast(Event.SceneUnloading, true);
 
 			yield return WaitFor.Seconds(0.2f);
+			CleanupUtil.CleanupInbetweenScenes();
 
 			CustomNetworkManager.Instance.ServerChangeScene("OnlineScene");
 

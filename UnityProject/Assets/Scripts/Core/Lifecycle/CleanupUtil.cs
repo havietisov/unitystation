@@ -2,6 +2,75 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+
+public static class Reporting
+{
+	public static string ReportingPath = "H:/UnityStationDumps/dump.json";
+
+	[System.Serializable]
+	public class ObjectInfo
+	{
+		[SerializeField]
+		public string ObjectString;
+		[SerializeField]
+		public WeakReference<MonoBehaviour> weakref;
+
+		public int scene_build_index = -9999;
+	}
+
+	[System.Serializable]
+	public struct FinalInfo
+	{
+		[SerializeField]
+		public string ObjectString;
+		[SerializeField]
+		public string lifecycle_status;
+	}
+
+	static System.Collections.Concurrent.ConcurrentQueue<ObjectInfo> object_queue = new System.Collections.Concurrent.ConcurrentQueue<ObjectInfo>();
+	public static void AddObject(MonoBehaviour @object)
+	{
+		object_queue.Enqueue(new ObjectInfo() { ObjectString = @object.GetType() + " :: " +  @object.ToString(), weakref = new WeakReference<MonoBehaviour>(@object), scene_build_index = @object.gameObject.scene.buildIndex });
+	}
+
+	public static void DumpAll()
+	{
+		using (var writer = System.IO.File.AppendText(ReportingPath))
+		{
+			foreach (var a in object_queue)
+			{
+				FinalInfo fi = new FinalInfo();
+				fi.ObjectString = a.ObjectString;
+				MonoBehaviour t;
+
+				if (a.weakref.TryGetTarget(out t))
+				{
+					if (t != null)
+					{
+						fi.lifecycle_status = "alive, build index : " + t.gameObject.scene.buildIndex;
+					}
+					else
+					{
+						fi.lifecycle_status = "leaked, build index : " + a.scene_build_index;
+					}
+
+					if (t is IHasDestructionInfo)
+					{
+						fi.lifecycle_status += ", destruction info : " + (t as IHasDestructionInfo).GetInfo();
+					}
+
+					writer.WriteLine(UnityEngine.JsonUtility.ToJson(fi));
+				}
+			}
+
+			writer.Flush();
+		}
+
+		Debug.Log("Dumped " + object_queue.Count + " objects");
+		object_queue.Clear();
+	}
+}
+
 public static class CleanupUtil
 {
 
@@ -181,24 +250,64 @@ public static class CleanupUtil
 		PlayerManager.Reset();
 		GameManager.Instance.CentComm.Clear();
 		Items.Weapons.ExplosiveBase.ExplosionEvent = new UnityEngine.Events.UnityEvent<Vector3Int, Items.Weapons.BlastData>();
-		UpdateManager.Instance.Clear();
 		Items.TrackingBeacon.Clear();
-		UI.Core.Action.UIActionManager.Instance.ClientMultiIActionGUIToID.Clear();
-		UI.Core.Action.UIActionManager.ClearAllActionsServer();
-		Systems.Cargo.CargoManager.Instance.OnRoundRestart();
 		SoundManager.Instance.Clear();
+		SpriteHandlerManager.Instance.OnRoundRestart(default(UnityEngine.SceneManagement.Scene), default(UnityEngine.SceneManagement.Scene));
+		UpdateManager.Instance.Clear();
+	}
+
+	public static void CleanupInbetweenScenes()
+	{
+		MatrixManager.Instance.ResetMatrixManager();
+		MatrixManager.IsInitialized = false;
+		GameManager.Instance.ResetStaticsOnNewRound();
+		Systems.Cargo.CargoManager.Instance.OnRoundRestart();
+		Systems.Scenes.LavaLandManager.Instance.Clean();
+		ClientSynchronisedEffectsManager.Instance.ClearData();
+		TileManager.Instance.Cleanup_between_rounds();
 	}
 
 	public static void RoundStartCleanup()
 	{
-		PlayerList.Instance.AllPlayers.ForEach(u => u.GameObject = u.GameObject == null ? null : u.GameObject);
-		ComponentManager.ObjectToPhysics.Clear();
-		Spawn.Clean();
-		CustomNetworkManager.Instance.Clear();
-		DynamicItemStorage.Clear();
-		AdminTools.AdminOverlay.Instance?.Clear();
-		EventManager.Instance.Clear();
-		Managers.SignalsManager.Instance.Clear();
-		UI.Core.Action.UIActionManager.Instance.Clear();
+		Initialisation.LoadManager.RegisterActionDelayed(()=> { Debug.Log("Delayed cleanup started");
+			ComponentManager.ObjectToPhysics.Clear();
+			Spawn.Clean();
+			MatrixManager.Instance.PostRoundStartCleanup();
+			Managers.SignalsManager.Instance.Clear();
+			//SpriteHandlerManager.Instance.ClearAllDirtyBits();
+			//UpdateManager.Instance.Clear();
+			AdminTools.AdminOverlay.Instance?.Clear();
+			//
+			TileManager.Instance.DeepCleanupTiles();
+			UI.Core.Action.UIActionManager.Instance.Clear();//maybe it'l work second time?
+			EventManager.Instance.Clear();
+			//PlayerList.Instance.AllPlayers.ForEach(u => u.GameObject = u.GameObject == null ? null : u.GameObject);
+			//CustomNetworkManager.Instance.Clear();
+			//DynamicItemStorage.Clear();
+			//
+			//
+			//
+			//
+			//Systems.Scenes.LavaLandManager.ClearBetweenRounds();
+			////
+			//foreach (var a in UnityEngine.GameObject.FindObjectsOfType<TileManager>())
+			//{
+			//	a.Cleanup_between_rounds();
+			//}
+			//
+			//
+			//TileManager.Instance.DeepCleanupTiles();
+			//Spawn.Clean();
+			//Systems.Scenes.LavaLandManager.ClearBetweenRounds();
+			//CustomNetworkManager.Instance.Clear();
+			//
+			//foreach (var a in UnityEngine.GameObject.FindObjectsOfType<TileManager>())
+			//{
+			//	a.Cleanup_between_rounds();
+			//}
+			//Debug.Log("Delayed cleanup finished");
+		}, 30);
+
+		//
 	}
 }

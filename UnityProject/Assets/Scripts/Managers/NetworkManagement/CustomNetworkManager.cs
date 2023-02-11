@@ -51,6 +51,16 @@ public class CustomNetworkManager : NetworkManager, IInitialise
 	public void Clear()
 	{
 		Debug.Log("removed " + CleanupUtil.RidDictionaryOfDeadElements(IndexLookupSpawnablePrefabs, (u, k) => u != null) + " dead elements from CustomNetworkManager.IndexLookupSpawnablePrefabs");
+
+		foreach (var a in IndexLookupSpawnablePrefabs)
+		{
+			TileManager tm = a.Key.GetComponent<TileManager>();
+
+			if (tm != null)
+			{
+				tm.DeepCleanupTiles();
+			}
+		}
 	}
 
 

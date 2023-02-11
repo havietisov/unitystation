@@ -59,6 +59,11 @@ namespace Systems.Scenes
 			EventManager.RemoveHandler(Event.ScenesLoadedServer, SpawnLavaLand);
 		}
 
+		public void Clean()
+		{
+			tileChangeManager = null;
+		}
+
 		public void SpawnLavaLand()
 		{
 			if (CustomNetworkManager.IsServer == false) return;
@@ -228,6 +233,11 @@ namespace Systems.Scenes
 					}
 				}
 			}
+		}
+
+		public static void ClearBetweenRounds()
+		{
+			Debug.Log("removed " + CleanupUtil.RidListOfDeadElements(Instance.randomGenScripts) + " dead elements from LavalLandManager.randomGenScripts");
 		}
 	}
 }

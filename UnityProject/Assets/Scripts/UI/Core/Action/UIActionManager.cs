@@ -51,7 +51,9 @@ namespace UI.Core.Action
 			Debug.Log("removed " + CleanupUtil.RidDictionaryOfDeadElements(MultiIActionGUIToID, (u, k) => u as MonoBehaviour != null) + " from UIActionManager.MultiIActionGUIToID");
 			Debug.Log("removed " + CleanupUtil.RidDictionaryOfDeadElements(ClientMultiIActionGUIToID, (u, k) => u as MonoBehaviour != null) + " from UIActionManager.ClientMultiIActionGUIToID");
 			Debug.Log("removed " + CleanupUtil.RidDictionaryOfDeadElements(ActivePlayerActions, (u, k) => u != null) + " from UIActionManager.ActivePlayerActions");
-
+			Debug.Log("removed " + CleanupUtil.RidDictionaryOfDeadElements(Instance.DicIActionGUI, (u, k) => u as MonoBehaviour != null) + " from Instance.DicIActionGUI");
+			Debug.Log("removed " + CleanupUtil.RidDictionaryOfDeadElements(Instance.IActionGUIToMind, (u, k) => u as MonoBehaviour != null) + " from Instance.IActionGUIToMind");
+			
 			{
 				int internals = 0;
 
@@ -61,6 +63,17 @@ namespace UI.Core.Action
 				}
 
 				Debug.Log("removed " + internals + " from internals of UIActionManager.ActivePlayerActions");
+			}
+
+			{
+				int internals = 0;
+
+				foreach (var a in Instance.DicIActionGUI)
+				{
+					internals += CleanupUtil.RidListOfDeadElements(a.Value);
+				}
+
+				Debug.Log("removed " + internals + " from internals of Instance.DicIActionGUI");
 			}
 
 		}
@@ -375,7 +388,7 @@ namespace UI.Core.Action
 			if (Body == null)
 			{
 				//Client stuff
-				if (Instance.DicIActionGUI.ContainsKey(iAction))
+				if (Instance.DicIActionGUI.ContainsKey(iAction) && Instance.ClientIActionGUIToID.ContainsKey(iAction))
 				{
 					var _UIAction = Instance.DicIActionGUI[iAction][0];
 					var ID = Instance.ClientIActionGUIToID[iAction];
@@ -405,6 +418,11 @@ namespace UI.Core.Action
 
 		public void OnRoundEnd()
 		{
+			if (this == null)
+			{
+				Debug.LogError("damn hell");
+			}
+
 			foreach (var _Actions in DicIActionGUI)
 			{
 				foreach (var _Action in _Actions.Value)

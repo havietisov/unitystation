@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Linq;
 
 namespace Tiles
 {
@@ -42,6 +43,11 @@ namespace Tiles
 		protected Layer layer;
 
 		public override Sprite PreviewSprite => sprites != null && sprites.Length > 0 ? sprites[0] : null;
+
+		public Layer Layer
+		{
+			get => layer;
+		}
 
 		private Sprite[] sprites
 		{
@@ -127,6 +133,22 @@ namespace Tiles
 				tileData.colliderType = Tile.ColliderType.Grid;
 				tileData.transform = Matrix4x4.Rotate(rotation);
 				//tileData.flags = TileFlags.LockTransform;
+			}
+		}
+
+		private void OnDestroy()
+		{
+			if (layer == null)
+			{
+				layer = null;//set to null if object is destroyed and holds reference to it. part of a "memory leak fix project"
+			}
+		}
+
+		public void Clear()
+		{
+			if (layer == null)
+			{
+				layer = null;//set to null if object is destroyed and holds reference to it. part of a "memory leak fix project"
 			}
 		}
 
