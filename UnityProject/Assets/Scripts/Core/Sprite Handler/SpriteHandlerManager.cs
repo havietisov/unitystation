@@ -42,6 +42,22 @@ public class SpriteHandlerManager : NetworkBehaviour
 		}
 	}
 
+	public int Clean()
+	{
+		int ret = 0;
+
+		ret += CleanupUtil.RidDictionaryOfDeadElements(PresentSprites, (u, k) => u != null);
+
+		foreach (var a in PresentSprites)
+		{
+			ret += CleanupUtil.RidDictionaryOfDeadElements(a.Value, (u, k) => k != null);
+		}
+
+		Debug.Log("removed " + ret + " dead elements from PresentSprites");
+
+		return ret;
+	}
+
 	private void OnEnable()
 	{
 		SceneManager.activeSceneChanged += OnRoundRestart;
@@ -52,7 +68,7 @@ public class SpriteHandlerManager : NetworkBehaviour
 		SceneManager.activeSceneChanged -= OnRoundRestart;
 	}
 
-	void OnRoundRestart(Scene oldScene, Scene newScene)
+	public void OnRoundRestart(Scene oldScene, Scene newScene)
 	{
 		SpecialQueueChanges.Clear();
 		SpecialNewClientChanges.Clear();

@@ -65,57 +65,9 @@ public class TileManager : SingletonManager<TileManager>, IInitialise
 		}
 	}
 
-	public void DeepCleanupTiles()
+	public int DeepCleanupTiles()
 	{
-		int deep_cleanup_removed = 0;
-		int layertilcoll_cleaned = 0;
-
-		foreach (var a in tiles)
-		{
-			List<KeyValuePair<string, LayerTile>> survivors = new List<KeyValuePair<string, LayerTile>>();
-
-			foreach (var b in a.Value)
-			{
-				if (b.Value is ConnectedTile)
-				{
-					if ((b.Value as ConnectedTile).Layer != null)
-					{
-						survivors.Add(b);
-					}
-
-					continue;
-				}
-
-				{
-					survivors.Add(b);
-				}
-			}
-
-			deep_cleanup_removed += survivors.Count - a.Value.Count;
-			a.Value.Clear();
-
-			foreach (var c in survivors)
-			{
-				a.Value.Add(c.Key, c.Value);
-			}
-
-		}
-
-		foreach (var a in layerTileCollections)
-		{
-			foreach (var b in a.layerTiles)
-			{
-				if (b is ConnectedTile)
-				{
-					(b as ConnectedTile).Clear();
-					layertilcoll_cleaned++;
-				}
-			}
-		}
-
-
-		Debug.Log("cleaned " + layertilcoll_cleaned + " entries within TileManager.layerTileCollections");
-		Debug.Log("removed " + deep_cleanup_removed + " members of TileManager.tiles during deep cleanup");
+		return 0;
 	}
 
 	public override void Awake()
@@ -131,7 +83,7 @@ public class TileManager : SingletonManager<TileManager>, IInitialise
 	[ContextMenu("Cache All Assets")]
 	public bool CacheAllAssets()
 	{
-		layerTileCollections.Clear();
+		layerTileCollections = new List<TilePathEntry>();
 		foreach (TileType tileType in Enum.GetValues(typeof(TileType)))
 		{
 			string path = TilePaths.Get(tileType);
@@ -222,6 +174,6 @@ public class TileManager : SingletonManager<TileManager>, IInitialise
 
 	public void Cleanup_between_rounds()
 	{
-		layerTileCollections.Clear();
+		layerTileCollections = new List<TilePathEntry>();
 	}
 }

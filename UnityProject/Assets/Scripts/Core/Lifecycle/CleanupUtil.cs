@@ -1,7 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using System;
+using UI.Action;
+
+public class CleanupUtilWindow : EditorWindow
+{
+	[MenuItem("Window/Cleanup util")]
+	static void Init()
+	{
+		CleanupUtilWindow wnd = EditorWindow.GetWindow<CleanupUtilWindow>();
+		wnd.Show();
+	}
+
+	string last_message = "";
+
+	private void OnGUI()
+	{
+		GUILayout.Label(last_message);
+
+		if (GUILayout.Button("TileManager.Instance.DeepCleanupTiles()"))
+		{
+			int i = 0;
+
+			var tileManagers = FindObjectsOfType<TileManager>();
+			Debug.Log("tileManagers.Len = " + tileManagers.Length);
+
+			foreach (var a in tileManagers)
+			{
+				i += a.DeepCleanupTiles();
+			}
+
+			last_message = "removed " + (TileManager.Instance.DeepCleanupTiles() + i) + " objects using TileManager.Instance.DeepCleanupTiles()";
+		}
+
+		if (GUILayout.Button("SpriteHandlerManager.Instance.Clean()"))
+		{
+			SpriteHandlerManager.Instance.Clean();
+		}	
+	}
+}
 
 public static class Reporting
 {
@@ -270,17 +309,29 @@ public static class CleanupUtil
 	public static void RoundStartCleanup()
 	{
 		Initialisation.LoadManager.RegisterActionDelayed(()=> { Debug.Log("Delayed cleanup started");
+
+			foreach (var a in UnityEngine.GameObject.FindObjectsOfType<UIAction>(true))
+			{
+				if ((a.iAction is UI.Action.ItemActionButton) && (a.iAction as UI.Action.ItemActionButton == null || (a.iAction as UI.Action.ItemActionButton).CurrentlyOn == null))
+				{
+					a.iAction = null;
+					UnityEngine.GameObject.Destroy(a.gameObject);
+				}
+			}
+
 			ComponentManager.ObjectToPhysics.Clear();
 			Spawn.Clean();
 			MatrixManager.Instance.PostRoundStartCleanup();
 			Managers.SignalsManager.Instance.Clear();
+			SpriteHandlerManager.Instance.Clean();
 			//SpriteHandlerManager.Instance.ClearAllDirtyBits();
 			//UpdateManager.Instance.Clear();
 			AdminTools.AdminOverlay.Instance?.Clear();
 			//
+
 			TileManager.Instance.DeepCleanupTiles();
 			UI.Core.Action.UIActionManager.Instance.Clear();//maybe it'l work second time?
-			EventManager.Instance.Clear();
+			//EventManager.Instance.Clear();
 			//PlayerList.Instance.AllPlayers.ForEach(u => u.GameObject = u.GameObject == null ? null : u.GameObject);
 			//CustomNetworkManager.Instance.Clear();
 			//DynamicItemStorage.Clear();

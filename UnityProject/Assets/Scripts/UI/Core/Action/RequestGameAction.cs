@@ -57,6 +57,8 @@ public class RequestGameAction : ClientMessage<RequestGameAction.NetMessage>
 				IServerActionGUIMulti.CallActionServer(IServerActionGUIMulti.ActionData[msg.listIndex], SentByPlayer);
 			}
 		}
+
+		SentByPlayer = null;
 	}
 
 	public static void Send(IActionGUI iServerActionGUI)
