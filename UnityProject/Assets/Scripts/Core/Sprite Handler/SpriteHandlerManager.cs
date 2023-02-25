@@ -41,7 +41,6 @@ public class SpriteHandlerManager : NetworkBehaviour
 			new Task(SpriteCatalogue.Instance.GenerateResistantCatalogue).Start();
 		}
 	}
-
 	public int Clean()
 	{
 		int ret = 0;
@@ -51,6 +50,36 @@ public class SpriteHandlerManager : NetworkBehaviour
 		foreach (var a in PresentSprites)
 		{
 			ret += CleanupUtil.RidDictionaryOfDeadElements(a.Value, (u, k) => k != null);
+
+			foreach (var f in a.Value)
+			{
+				List<Action<Color>> survivor_list = new List<Action<Color>>();
+
+				foreach (var b in f.Value.OnColorChanged)
+				{
+					if ((!(b.Target is UI_ItemImage.ImageAndHandler)) || (b.Target as UI_ItemImage.ImageAndHandler).UIImage != null)
+					{
+						survivor_list.Add(b);
+					}
+				}
+				f.Value.OnColorChanged.Clear();
+				f.Value.OnColorChanged.AddRange(survivor_list);
+			}
+
+			foreach (var f in a.Value)
+			{
+				List<Action<Sprite>> survivor_list = new List<Action<Sprite>>();
+
+				foreach (var b in f.Value.OnSpriteChanged)
+				{
+					if ((!(b.Target is UI_ItemImage.ImageAndHandler)) || (b.Target as UI_ItemImage.ImageAndHandler).UIImage != null)
+					{
+						survivor_list.Add(b);
+					}
+				}
+				f.Value.OnSpriteChanged.Clear();
+				f.Value.OnSpriteChanged.AddRange(survivor_list);
+			}
 		}
 
 		Debug.Log("removed " + ret + " dead elements from PresentSprites");
@@ -82,6 +111,7 @@ public class SpriteHandlerManager : NetworkBehaviour
 
 	public void OnDestroy()
 	{
+		SceneManager.activeSceneChanged -= OnRoundRestart;
 		SpecialQueueChanges.Clear();
 		SpecialNewClientChanges.Clear();
 		SpecialPresentSprites.Clear();
@@ -89,6 +119,7 @@ public class SpriteHandlerManager : NetworkBehaviour
 		QueueChanges.Clear();
 		NewClientChanges.Clear();
 		PresentSprites.Clear();
+		PresentSprites = new Dictionary<NetworkIdentity, Dictionary<string, SpriteHandler>>();
 		SpriteUpdateMessage.UnprocessedData.Clear();
 	}
 

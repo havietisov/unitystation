@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using UI.Action;
+using Audio.Containers;
 
 public class CleanupUtilWindow : EditorWindow
 {
@@ -38,7 +39,7 @@ public class CleanupUtilWindow : EditorWindow
 		if (GUILayout.Button("SpriteHandlerManager.Instance.Clean()"))
 		{
 			SpriteHandlerManager.Instance.Clean();
-		}	
+		}
 	}
 }
 
@@ -228,7 +229,7 @@ public static class CleanupUtil
 		return res;
 	}
 
-	public static int RidDictionaryOfDeadElements<TKey, TValue>(Dictionary<TKey, TValue> dict_in_question, Func<TKey, TValue, bool> condition )
+	public static int RidDictionaryOfDeadElements<TKey, TValue>(IDictionary<TKey, TValue> dict_in_question, Func<TKey, TValue, bool> condition )
 	{
 		if (dict_in_question == null)
 		{
@@ -288,11 +289,55 @@ public static class CleanupUtil
 	{
 		PlayerManager.Reset();
 		GameManager.Instance.CentComm.Clear();
+		GameManager.Instance.SpaceBodies.Clear();
 		Items.Weapons.ExplosiveBase.ExplosionEvent = new UnityEngine.Events.UnityEvent<Vector3Int, Items.Weapons.BlastData>();
 		Items.TrackingBeacon.Clear();
 		SoundManager.Instance.Clear();
 		SpriteHandlerManager.Instance.OnRoundRestart(default(UnityEngine.SceneManagement.Scene), default(UnityEngine.SceneManagement.Scene));
 		UpdateManager.Instance.Clear();
+		AudioManager.Instance.MultiInterestFloat.InterestedParties.Clear();
+		SoundManager.Instance.SoundSpawns.Clear();
+		SoundManager.Instance.NonplayingSounds.Clear();
+		GameManager.Instance.ResetStaticsOnNewRound();
+		SpriteHandlerManager.PresentSprites.Clear();
+		//Managers.SignalsManager.Instance.Receivers.Clear();
+		LandingZoneManager.Instance.landingZones.Clear();
+		LandingZoneManager.Instance.spaceTeleportPoints.Clear();
+		SpriteHandlerManager.PresentSprites = new Dictionary<Mirror.NetworkIdentity, Dictionary<string, SpriteHandler>>();
+		ChatBubbleManager.Instance.Clear();
+
+		foreach (var a in GameObject.FindObjectsOfType<AdminTools.AdminPlayerEntry>(true))
+		{
+			a.pendingMsgNotification = null;
+		}
+
+		foreach (var a in GameObject.FindObjectsOfType<UI_ItemSlot>(true))
+		{
+			a.Image.ClearAll();
+		}
+		
+		foreach (var a in GameObject.FindObjectsOfType<UI_SlotManager>(true))
+		{
+			a.OpenSlots.Clear();
+		}
+		
+		//foreach (var a in GameObject.FindObjectsOfType<SpriteHandler>(true))
+		//{
+		//	GameObject.Destroy(a.gameObject);
+		//}
+
+
+		UI_ItemImage.ImageAndHandler.ClearAll();
+
+		//foreach (var a in GameObject.FindObjectsOfType<UnityEngine.UI.Graphic>(true))
+		//{
+		//	a.StopAllCoroutines();
+		//}
+		//
+		//foreach (var a in GameObject.FindObjectsOfType<AdminTools.PlayerManagePage>())
+		//{
+		//	GameObject.Destroy(a.gameObject);
+		//}
 	}
 
 	public static void CleanupInbetweenScenes()
@@ -304,12 +349,14 @@ public static class CleanupUtil
 		Systems.Scenes.LavaLandManager.Instance.Clean();
 		ClientSynchronisedEffectsManager.Instance.ClearData();
 		TileManager.Instance.Cleanup_between_rounds();
+		CleanupUtil.RidListOfDeadElements(GameManager.Instance.SpaceBodies);
+		RidDictionaryOfDeadElements(LandingZoneManager.Instance.landingZones, (u, k) => u != null);
 	}
 
 	public static void RoundStartCleanup()
 	{
 		Initialisation.LoadManager.RegisterActionDelayed(()=> { Debug.Log("Delayed cleanup started");
-
+		
 			foreach (var a in UnityEngine.GameObject.FindObjectsOfType<UIAction>(true))
 			{
 				if ((a.iAction is UI.Action.ItemActionButton) && (a.iAction as UI.Action.ItemActionButton == null || (a.iAction as UI.Action.ItemActionButton).CurrentlyOn == null))
@@ -318,19 +365,31 @@ public static class CleanupUtil
 					UnityEngine.GameObject.Destroy(a.gameObject);
 				}
 			}
-
+		
 			ComponentManager.ObjectToPhysics.Clear();
 			Spawn.Clean();
 			MatrixManager.Instance.PostRoundStartCleanup();
-			Managers.SignalsManager.Instance.Clear();
 			SpriteHandlerManager.Instance.Clean();
+			Debug.Log("removed " + RidDictionaryOfDeadElements(Mirror.NetworkClient.spawned, (u,k)=> k != null) + " dead elements from Mirror.NetworkClient.spawned");
+		
+			Debug.Log("removed " + RidDictionaryOfDeadElements(SoundManager.Instance.SoundSpawns, (u, k) => k != null) + " dead elements from SoundManager.Instance.SoundSpawns");
 			//SpriteHandlerManager.Instance.ClearAllDirtyBits();
 			//UpdateManager.Instance.Clear();
 			AdminTools.AdminOverlay.Instance?.Clear();
 			//
-
+		
 			TileManager.Instance.DeepCleanupTiles();
+			CleanupUtil.RidListOfDeadElements(GameManager.Instance.SpaceBodies);
 			UI.Core.Action.UIActionManager.Instance.Clear();//maybe it'l work second time?
+			SpriteHandlerManager.Instance.Clean();
+			Dictionary<UInt64, Mirror.NetworkIdentity > dict = (Dictionary < UInt64, Mirror.NetworkIdentity > )typeof(Mirror.NetworkIdentity).GetField("sceneIds", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic).GetValue(null);
+			Debug.Log("removed " + RidDictionaryOfDeadElements(dict, (u, k) => k != null) + " dead elements from Mirror.NetworkIdentity.sceneIds");
+			RidDictionaryOfDeadElements(LandingZoneManager.Instance.landingZones, (u, k) => u != null);
+
+			SpriteHandlerManager.Instance.Clean();
+			Debug.Log("removed " + RidDictionaryOfDeadElements(SoundManager.Instance.NonplayingSounds, (u, k) => k != null) + " dead elements from SoundManager.Instance.NonplayingSounds");
+			RidDictionaryOfDeadElements(SpriteHandlerManager.PresentSprites, (u, k) => u != null && k != null);
+
 			//EventManager.Instance.Clear();
 			//PlayerList.Instance.AllPlayers.ForEach(u => u.GameObject = u.GameObject == null ? null : u.GameObject);
 			//CustomNetworkManager.Instance.Clear();
@@ -357,7 +416,7 @@ public static class CleanupUtil
 			//	a.Cleanup_between_rounds();
 			//}
 			//Debug.Log("Delayed cleanup finished");
-		}, 30);
+		}, 300);
 
 		//
 	}
