@@ -482,6 +482,20 @@ public class ItemStorage : MonoBehaviour, IServerLifecycle, IServerInventoryMove
 		return ItemSlot.GetIndexed(this, slotIndex);
 	}
 
+	public ItemSlot GetNextEmptySlot()
+	{
+		var slots = GetItemSlots();
+		foreach (var slot in slots)
+		{
+			if (slot.Item == null)
+			{
+				return slot;
+			}
+		}
+
+		return null;
+	}
+
 	/// <summary>
 	/// Server-side only. Destroys all items in inventory.
 	/// </summary>
@@ -578,6 +592,20 @@ public class ItemStorage : MonoBehaviour, IServerLifecycle, IServerInventoryMove
 	public ItemSlot GetTopOccupiedIndexedSlot()
 	{
 		return GetIndexedSlots().LastOrDefault(ids => ids.Item != null);
+	}
+
+	/// <summary>
+	/// Gets the highest indexed slot that is currently occupied. Null if none are occupied
+	/// </summary>
+	/// <returns></returns>
+	public List<ItemSlot> GetOccupiedSlots()
+	{
+		var result = new List<ItemSlot>();
+		foreach (var slot in GetIndexedSlots())
+		{
+			if (slot.IsOccupied) result.Add(slot);
+		}
+		return result;
 	}
 
 

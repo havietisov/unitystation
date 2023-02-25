@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using AdminTools;
 using Items.PDA;
 using UnityEngine;
 using Mirror;
@@ -11,12 +9,11 @@ using Audio.Containers;
 using ScriptableObjects;
 using AdminCommands;
 using Antagonists;
-using Systems.Atmospherics;
+using Core.Chat;
 using HealthV2;
 using Items;
 using Items.Tool;
 using Messages.Server;
-using UI.Systems.AdminTools.DevTools;
 using Objects.Other;
 using Player.Movement;
 using Shuttles;
@@ -25,11 +22,7 @@ using UI.Items;
 using Doors;
 using Managers;
 using Objects;
-using Objects.Atmospherics;
-using Objects.Disposals;
 using Player.Language;
-using Systems.Electricity;
-using Systems.Pipes;
 using Tiles;
 using Util;
 using Random = UnityEngine.Random;
@@ -736,59 +729,10 @@ public partial class PlayerNetworkActions : NetworkBehaviour
 		}
 	}
 
-	/// <summary>
-	/// Spawn the ghost for this player and tell the client to switch input / camera to it
-	/// </summary>
-	[Command]
-	public void CmdSpawnPlayerGhost()
-	{
-		ServerSpawnPlayerGhost();
-	}
 
-	[Server]
-	public void ServerSpawnPlayerGhost(bool skipCheck = false)
-	{
-		//Only force to ghost if the mind belongs in to that body
-		if (skipCheck)
-		{
-			playerScript.Mind.Ghost();
-			return;
-		}
 
-		var currentMobID = GetComponent<LivingHealthMasterBase>().mobID;
-		if (GetComponent<LivingHealthMasterBase>().IsDead && !playerScript.IsGhost && playerScript.Mind != null &&
-			playerScript.Mind.bodyMobID == currentMobID)
-		{
-			playerScript.Mind.Ghost();
-		}
-	}
 
-	/// <summary>
-	/// Asks the server to let the client rejoin into a logged off character.
-	/// </summary>
-	///
-	[Command]
-	public void CmdGhostCheck() // specific check for if you want value returned
-	{
-		GhostEnterBody();
-	}
 
-	[Server]
-	public void GhostEnterBody()
-	{
-		if (playerScript.Mind.IsSpectator) return;
-
-		if (playerScript.Mind.ghostLocked) return;
-
-		if (playerScript.IsGhost == false)
-		{
-			Logger.LogWarningFormat($"Either player {playerScript.Mind.name} is not dead or not currently a ghost, ignoring EnterBody",
-				Category.Ghosts);
-			return;
-		}
-
-		playerScript.Mind.StopGhosting();
-	}
 
 	/// <summary>
 	/// Disables input before a body transfer.
@@ -946,35 +890,6 @@ public partial class PlayerNetworkActions : NetworkBehaviour
 		handLabeler.GetComponent<HandLabeler>().SetLabel(label);
 	}
 
-
-	#region Admin-only
-
-	[Command]
-	public void CmdAGhost()
-	{
-		if (AdminCommandsManager.IsAdmin(connectionToClient, out _))
-		{
-			ServerAGhost();
-		}
-	}
-
-	[Server]
-	public void ServerAGhost()
-	{
-		if (playerScript.IsGhost == false)
-		{
-			//Admin turns into ghost
-			playerScript.Mind.Ghost();
-		}
-		else
-		{
-			//Admin goes back into body
-			playerScript.Mind.StopGhosting();
-		}
-	}
-
-	#endregion
-
 	// If we end up needing more information to send to server,
 	// probably best to create a new interaction type and use IF2.
 	[Command]
@@ -1067,5 +982,11 @@ public partial class PlayerNetworkActions : NetworkBehaviour
 		{
 			Inventory.ServerTransfer(gameObjectSent.PickupableOrNull().ItemSlot, slot, ReplacementStrategy.DropOther);
 		}
+	}
+
+	[Command]
+	public void CmdDoEmote(string emoteName)
+	{
+		EmoteActionManager.DoEmote(emoteName, playerScript.gameObject);
 	}
 }

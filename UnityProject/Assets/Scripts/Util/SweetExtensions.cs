@@ -80,7 +80,8 @@ public static class SweetExtensions
 		}
 
 		var player = go.Player();
-		if (player != null && !String.IsNullOrWhiteSpace(player.Script.visibleName))
+
+		if (player != null && player.Script != null && String.IsNullOrWhiteSpace(player.Script.visibleName) == false)
 		{
 			return player.Script.visibleName;
 		}
@@ -92,6 +93,12 @@ public static class SweetExtensions
 	{
 		return list?.Count > 0 ? list.PickRandom() : default(T);
 	}
+
+	public static Dictionary<uint, NetworkIdentity> GetSpawned()
+	{
+		return CustomNetworkManager.Spawned;
+	}
+
 
 	public static GameObject NetIdToGameObject(this uint NetID)
 	{
@@ -163,6 +170,19 @@ public static class SweetExtensions
 		else
 		{
 			return go;
+		}
+	}
+
+	/// Creates garbage! Use very sparsely!
+	public static CommonComponents GetCommonComponents(this GameObject go)
+	{
+		if (ComponentManager.TryGetCommonComponent(go, out  var commonComponent))
+		{
+			return commonComponent;
+		}
+		else
+		{
+			return null;
 		}
 	}
 
@@ -396,7 +416,7 @@ public static class SweetExtensions
 	{
 		if (chunkSize <= 0)
 		{
-			throw new ArgumentException("chunkSize must be greater than 0.");
+			throw new ArgumentException($"{nameof(chunkSize)} must be greater than 0.", nameof(chunkSize));
 		}
 
 		while (list.Any())

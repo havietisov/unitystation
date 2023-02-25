@@ -45,7 +45,7 @@ public class SpriteHandler : MonoBehaviour
 	[SerializeField]
 	private bool pushTextureOnStartUp = true;
 
-	[FormerlySerializedAs("variantIndex"), SerializeField, Range(0, 3)]
+	[FormerlySerializedAs("variantIndex"), SerializeField, Range(0, 9)]
 	private int initialVariantIndex = 0;
 
 	private int variantIndex = 0;
@@ -65,7 +65,7 @@ public class SpriteHandler : MonoBehaviour
 
 	private bool animateOnce;
 
-	private Color? setColour = null;
+	protected Color? setColour = null;
 
 	[Tooltip("The palette that is applied to the Sprite Renderer, if the Present Sprite Set is paletted.")]
 	[SerializeField] private List<Color> palette = new List<Color>();
@@ -111,7 +111,7 @@ public class SpriteHandler : MonoBehaviour
 	/// Current sprite from SpriteRender or Image
 	/// Null if sprite is hidden
 	/// </summary>
-	public Sprite CurrentSprite
+	public virtual Sprite CurrentSprite
 	{
 		get
 		{
@@ -132,7 +132,7 @@ public class SpriteHandler : MonoBehaviour
 	/// Current sprite color from SpriteRender or Image
 	/// White means no color modification was added
 	/// </summary>
-	public Color CurrentColor
+	public virtual Color CurrentColor
 	{
 		get
 		{
@@ -164,6 +164,8 @@ public class SpriteHandler : MonoBehaviour
 	{
 		return networkIdentity;
 	}
+
+	private bool _initialAwake = true;
 
 	/// <summary>
 	/// Changes the object's active <see cref="SpriteDataSO"></see>.
@@ -343,6 +345,10 @@ public class SpriteHandler : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// Forces the sprite handler to clear out the current sprites being displayed.
+	/// </summary>
+	/// <param name="networked">Network this action to all clients.</param>
 	public void PushClear(bool networked = true)
 	{
 		if (HasSpriteInImageComponent() == false) return;
@@ -584,7 +590,7 @@ public class SpriteHandler : MonoBehaviour
 	}
 
 
-	void Awake()
+	protected virtual void Awake()
 	{
 		if (Application.isPlaying)
 		{
@@ -618,6 +624,10 @@ public class SpriteHandler : MonoBehaviour
 				{
 					PushTexture(false);
 				}
+				else
+				{
+					PushClear();
+				}
 			}
 		}
 	}
@@ -636,7 +646,7 @@ public class SpriteHandler : MonoBehaviour
 		}
 	}
 
-	private void SetImageColor(Color value)
+	protected virtual void SetImageColor(Color value)
 	{
 		if (spriteRenderer != null)
 		{
@@ -650,7 +660,7 @@ public class SpriteHandler : MonoBehaviour
 		new List<Action<Color>>(OnColorChanged?.ToArray()).ForEach(u => u(value));
 	}
 
-	private void UpdateImageColor()
+	protected virtual  void UpdateImageColor()
 	{
 		if (spriteRenderer != null)
 		{
@@ -662,7 +672,7 @@ public class SpriteHandler : MonoBehaviour
 		}
 	}
 
-	private void SetPaletteOnSpriteRenderer()
+	protected virtual void SetPaletteOnSpriteRenderer()
 	{
 		isPaletteSet = true;
 		var palette = GetPaletteOrNull();
@@ -702,7 +712,7 @@ public class SpriteHandler : MonoBehaviour
 		}
 	}
 
-	private void SetImageSprite(Sprite value)
+	protected virtual void SetImageSprite(Sprite value)
 	{
 
 #if  UNITY_EDITOR
@@ -711,6 +721,11 @@ public class SpriteHandler : MonoBehaviour
 			if (spriteRenderer == null)
 			{
 				spriteRenderer = GetComponent<SpriteRenderer>();
+			}
+
+			if (image == null)
+			{
+				image = GetComponent<Image>();
 			}
 		}
 #endif
@@ -751,7 +766,7 @@ public class SpriteHandler : MonoBehaviour
 		new List<Action<Sprite>>(OnSpriteChanged?.ToArray()).ForEach(u => u(value));
 	}
 
-	public bool HasSpriteInImageComponent()
+	protected virtual bool HasSpriteInImageComponent()
 	{
 		if (spriteRenderer != null)
 		{
@@ -776,7 +791,12 @@ public class SpriteHandler : MonoBehaviour
 	{
 		if (Application.isPlaying)
 		{
-			PushTexture(false); // TODO: animations don't resume when sprite object is disabled and re-enabled, this is a workaround
+			if (_initialAwake == false && HasSpriteInImageComponent())
+			{
+				PushTexture(false); // TODO: animations don't resume when sprite object is disabled and re-enabled, this is a workaround
+			}
+
+			_initialAwake = false;
 		}
 	}
 

@@ -28,7 +28,7 @@ jobs:
         projectPath:
           - UnityProject
         unityVersion:
-          - 2021.3.12f1
+          - 2021.3.16f1
         targetPlatform:
           - StandaloneWindows64
 
@@ -62,7 +62,7 @@ jobs:
       - name: Run tests
         uses: game-ci/unity-test-runner@v2
         with:
-          customParameters: "-nographics"
+          customParameters: "-nographics -ignoreCompilerErrors -executeMethod NugetForUnity.NugetHelper.Restore"
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           artifactsPath: ./testReports/${{ matrix.targetPlatform }}

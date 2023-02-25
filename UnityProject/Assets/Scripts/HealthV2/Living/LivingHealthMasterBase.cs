@@ -203,6 +203,8 @@ namespace HealthV2
 		public RootBodyPartController rootBodyPartController;
 
 
+		public ChatModifier BodyChatModifier = ChatModifier.None;
+
 		public float BodyPartSurfaceVolume = 5;
 
 		/// <summary>
@@ -587,8 +589,8 @@ namespace HealthV2
 		#region Mutations
 
 		public int Stability = 0;
-		public int NegativeMutationMinimumTimeMinutes = 5;
-		public int NegativeMutationMaximumTimeMinutes = 15;
+		public int NegativeMutationMinimumTimeMinutes = 1;
+		public int NegativeMutationMaximumTimeMinutes = 4;
 		private Coroutine routine;
 
 
@@ -672,7 +674,7 @@ namespace HealthV2
 				yield return WaitFor.Seconds(1f);
 				foreach (var BP in BodyPartList)
 				{
-					if (BP.name.Contains(InDNAMutationData.BodyPartSearchString))
+					if (BP.name.ToLower().Contains(InDNAMutationData.BodyPartSearchString.ToLower()))
 					{
 						yield return WaitFor.Seconds(1f);
 						var Mutation = BP.GetComponent<BodyPartMutations>();
@@ -1160,7 +1162,7 @@ namespace HealthV2
 			RestartHeart();
 			playerScript.playerMove.allowInput = true; //Let them interact with the world again.
 			playerScript.RegisterPlayer.ServerStandUp();
-			playerScript.ReturnGhostToBody();
+			playerScript.Mind.OrNull()?.StopGhosting();
 		}
 
 		public void RestartHeart()
@@ -1887,10 +1889,11 @@ namespace HealthV2
 
 
 
-		public void IndicatePain(float dmgTaken)
+		public void IndicatePain(float dmgTaken, bool ignoreCooldown = false)
 		{
-			if (EmoteActionManager.Instance == null || screamEmote == null ||
-			    canScream == false || ConsciousState == ConsciousState.UNCONSCIOUS || IsDead) return;
+			if (EmoteActionManager.Instance == null || screamEmote == null
+			                                        || ConsciousState == ConsciousState.UNCONSCIOUS || IsDead) return;
+			if (ignoreCooldown == false && canScream == false) return;
 			if (dmgTaken < painScreamDamage) return;
 			EmoteActionManager.DoEmote(screamEmote, playerScript.gameObject);
 			StartCoroutine(ScreamCooldown());

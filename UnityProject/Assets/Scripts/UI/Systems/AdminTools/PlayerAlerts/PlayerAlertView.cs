@@ -9,7 +9,7 @@ using Mirror;
 using UnityEngine.UI;
 
 
-public class PlayerAlertView : ChatEntryView
+public class PlayerAlertView : ChatEntryView, IDisposable
 {
 	private PlayerAlertData playerAlertData;
 	public PlayerAlertData LoadedData => playerAlertData;
@@ -41,6 +41,11 @@ public class PlayerAlertView : ChatEntryView
 		}
 	}
 
+	void OnDestroy()
+	{
+		this.Dispose();
+	}
+
 	public void GibRequest()
 	{
 		AdminPlayerAlertActions.Send(PlayerAlertActions.Gibbed, playerAlertData.roundTime, playerAlertData.playerNetId, PlayerList.Instance.AdminToken);
@@ -60,7 +65,7 @@ public class PlayerAlertView : ChatEntryView
 		if (PlayerManager.LocalPlayerScript.IsGhost == false)
 		{
 			teleportButton.interactable = false;
-			PlayerManager.LocalPlayerScript.PlayerNetworkActions.CmdAGhost();
+			PlayerManager.LocalMindScript.CmdAGhost();
 			cancelSource = new CancellationTokenSource();
 			StartCoroutine(GhostWait(target.gameObject, cancelSource.Token));
 		}
@@ -96,5 +101,10 @@ public class PlayerAlertView : ChatEntryView
 	{
 		AdminPlayerAlertActions.Send(PlayerAlertActions.TakenCareOf, playerAlertData.roundTime, playerAlertData.playerNetId, PlayerList.Instance.AdminToken);
 		takenCareOfButton.interactable = false;
+	}
+
+	public void Dispose()
+	{
+		cancelSource?.Dispose();
 	}
 }

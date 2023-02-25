@@ -201,7 +201,7 @@ namespace Systems.Cargo
 				}
 			}
 
-			OnShuttleUpdate.Invoke();
+			OnShuttleUpdate?.Invoke();
 		}
 
 		private IEnumerator Timer(bool launchToStation)
@@ -209,7 +209,7 @@ namespace Systems.Cargo
 			while (CurrentFlyTime > 0f)
 			{
 				CurrentFlyTime -= 1f;
-				OnTimerUpdate.Invoke();
+				OnTimerUpdate?.Invoke();
 				yield return WaitFor.Seconds(1);
 			}
 

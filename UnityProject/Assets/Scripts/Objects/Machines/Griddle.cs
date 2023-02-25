@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 using Mirror;
 using NaughtyAttributes;
@@ -22,7 +23,7 @@ namespace Objects.Kitchen
 	/// If the item has the Cookable component, the item will be cooked
 	/// once enough time has lapsed as determined in that component.
 	/// </summary>
-	public class Griddle : NetworkBehaviour, IAPCPowerable, IRefreshParts
+	public class Griddle : NetworkBehaviour, IAPCPowerable, IRefreshParts, IDisposable
 	{
 		private enum SpriteState
 		{
@@ -35,8 +36,6 @@ namespace Objects.Kitchen
 		[SerializeField]
 		[Tooltip("The looped audio source to play while the griddle is running.")]
 		private AddressableAudioSource RunningAudio = default;
-
-		private string runLoopGUID = "";
 
 		[SerializeField, Foldout("Power Usages")]
 		[Tooltip("Wattage of the griddle's circuitry and display.")]
@@ -52,8 +51,11 @@ namespace Objects.Kitchen
 		private SpriteHandler spriteHandler;
 		private APCPoweredDevice poweredDevice;
 
+		// Audio loop related vars
 		[SyncVar(hook = nameof(OnSyncPlayAudioLoop))]
 		private bool playAudioLoop;
+		private Mutex audioLoopLock = new Mutex();
+		private string audioLoopGUID = string.Empty;
 
 		public bool IsOperating => CurrentState is GriddleRunning;
 
@@ -87,6 +89,11 @@ namespace Objects.Kitchen
 		private void OnDisable()
 		{
 			UpdateManager.Remove(CallbackType.UPDATE, UpdateMe);
+		}
+
+		void OnDestroy()
+		{
+			this.Dispose();
 		}
 
 		#endregion
@@ -185,21 +192,29 @@ namespace Objects.Kitchen
 
 		private void OnSyncPlayAudioLoop(bool oldState, bool newState)
 		{
+
+			// Only one thread should be able to try to play the sound at a time.
+			// Otherwise causes issues where while one thread is waiting another thread
+			// can get in here to request it a second time and the sound plays twice.
+			audioLoopLock.WaitOne();
+
 			if (newState)
 			{
-				if (string.IsNullOrEmpty(runLoopGUID) == false)
+				if (string.IsNullOrEmpty(audioLoopGUID) == false)
 				{
-					SoundManager.Stop(runLoopGUID);
-					runLoopGUID = "";
+					SoundManager.Stop(audioLoopGUID);
+					audioLoopGUID = string.Empty;
 				}
 
 				StartCoroutine(DelayGriddleRunningSfx());
 			}
 			else
 			{
-				SoundManager.Stop(runLoopGUID);
-				runLoopGUID = "";
+				SoundManager.Stop(audioLoopGUID);
+				audioLoopGUID = string.Empty;
 			}
+
+			audioLoopLock.ReleaseMutex();
 		}
 
 		// We delay the running Sfx so the starting Sfx has time to play.
@@ -208,10 +223,11 @@ namespace Objects.Kitchen
 			yield return WaitFor.Seconds(0.25f);
 
 			// Check to make sure the state hasn't changed in the meantime.
-			if (playAudioLoop)
+			if (playAudioLoop && string.IsNullOrEmpty(audioLoopGUID))
 			{
-				runLoopGUID = Guid.NewGuid().ToString();
-				SoundManager.PlayAtPositionAttached(RunningAudio, registerTile.WorldPosition, gameObject, runLoopGUID,
+				audioLoopGUID = Guid.NewGuid().ToString();
+
+				SoundManager.PlayAtPositionAttached(RunningAudio, registerTile.WorldPosition, gameObject, audioLoopGUID,
 						audioSourceParameters: new AudioSourceParameters(pitch: voltageModifier));
 			}
 		}
@@ -340,5 +356,10 @@ namespace Objects.Kitchen
 		}
 
 		#endregion
+
+		public void Dispose()
+		{
+			audioLoopLock?.Dispose();
+		}
 	}
 }

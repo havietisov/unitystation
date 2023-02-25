@@ -384,7 +384,7 @@ public partial class Chat : MonoBehaviour
 	private static Loudness CheckVoiceLevel(PlayerScript script, ChatChannel channels)
 	{
 		//Check if is not a ghost/spectator and the player has an inventory.
-		if (script.IsDeadOrGhost || script.DynamicItemStorage == null)
+		if (script == null || script.IsDeadOrGhost || script.DynamicItemStorage == null)
 		{
 			return Loudness.NORMAL;
 		}
@@ -763,6 +763,7 @@ public partial class Chat : MonoBehaviour
 	/// <param name="msg">The examine message</param>
 	public static void AddExamineMsgFromServer(GameObject recipient, string msg)
 	{
+		if (recipient == null) return;
 		if (!IsServer()) return;
 		UpdateChatMessage.Send(recipient, ChatChannel.Examine, ChatModifier.None, msg, Loudness.NORMAL);
 	}

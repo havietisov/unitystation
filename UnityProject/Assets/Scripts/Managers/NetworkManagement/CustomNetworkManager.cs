@@ -372,6 +372,7 @@ public class CustomNetworkManager : NetworkManager, IInitialise
 	/// server actions when client disconnects
 	public override void OnServerDisconnect(NetworkConnectionToClient conn)
 	{
+		Logger.LogError($"Disconnecting {conn.address}");
 		//register them as removed from our own player list
 		PlayerList.Instance.RemoveByConnection(conn);
 
@@ -381,12 +382,14 @@ public class CustomNetworkManager : NetworkManager, IInitialise
 		//note that we can't remove authority from player owned objects, the workaround is to transfer authority to
 		//a different temporary object, remove authority from the original, and then run the normal disconnect logic
 
+
 		//transfer to a temporary object
 		GameObject disconnectedViewer = Instantiate(CustomNetworkManager.Instance.disconnectedViewerPrefab);
 		NetworkServer.ReplacePlayerForConnection(conn, disconnectedViewer, System.Guid.NewGuid());
 
 		foreach (var ownedObject in conn.clientOwnedObjects.ToArray())
 		{
+			if (disconnectedViewer == ownedObject.gameObject) continue;
 			ownedObject.RemoveClientAuthority();
 		}
 
