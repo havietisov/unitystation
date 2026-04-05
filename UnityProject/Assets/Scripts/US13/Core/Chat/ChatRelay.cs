@@ -48,6 +48,8 @@ namespace US13.Core.Chat
 
 		private RconManager rconManager;
 
+		public static event Action<ChatEvent> OnLocalChatProcessed;
+
 		/// <summary>
 		/// The char indicating that the following text is speech.
 		/// For example: Player says, [Character goes here]"ALL CLOWNS MUST SUFFER"
@@ -86,6 +88,7 @@ namespace US13.Core.Chat
 		[Server]
 		public void PropagateChatToClients(ChatEvent chatEvent)
 		{
+			OnLocalChatProcessed?.Invoke(chatEvent); // TODO: Remove this
 			List<PlayerInfo> players = PlayerList.Instance.AllPlayers;
 			if (chatEvent.originator != null) WhisperCheck(chatEvent);
 

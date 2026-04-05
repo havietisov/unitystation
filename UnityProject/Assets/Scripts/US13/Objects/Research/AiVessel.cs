@@ -68,6 +68,20 @@ namespace US13.Objects.Research
 
 		public List<SpriteAndDead> AICoreSprites;
 
+		public void Start()
+		{
+			if(Mirror.NetworkServer.active == false)
+			{
+				Debug.Log("[Client] AiVessel Start" + GetInstanceID().ToString() + " " + isInteliCard.ToString());
+			}
+			else
+			{
+				Debug.Log("[Server] AiVessel Start" + GetInstanceID().ToString() + " " + isInteliCard.ToString());
+			}
+
+			ReserveCore.AddAsComponentToObject(gameObject);
+		}
+
 		[Server]
 		public void NextCoreSprite()
 		{
